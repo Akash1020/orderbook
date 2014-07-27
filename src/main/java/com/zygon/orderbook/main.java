@@ -1,2 +1,4 @@
-public class Main {
+package com.zygon.orderbook;
+
+public class main {
 }
