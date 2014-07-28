@@ -40,6 +40,7 @@ public class OrderBook {
             }
         );
     
+    // Shortcut for canceling orders
     private final Map<String, Order> ordersById = Maps.newHashMap();
     
     public synchronized void addOrder(final Order order) {
@@ -80,7 +81,7 @@ public class OrderBook {
                 });
         
         if (!filterKeys.isEmpty()) {
-            System.out.println("process transactions!!");
+//            System.out.println("process transactions!!");
             TreeMap<BigDecimal, Collection<Order>> filteredMap = Maps.newTreeMap();
             filteredMap.putAll(filterKeys.asMap());
             
@@ -96,17 +97,15 @@ public class OrderBook {
                     // The iterator of the values
                     Iterator<Order> valIter = values.iterator();
                                 
-                    System.out.println("Remaining fill: " + fillDecrementer + ", looking at price " + tradePrice);
+//                    System.out.println("Remaining fill: " + fillDecrementer + ", looking at price " + tradePrice);
                     
                     boolean doneWithValues = false;
                     
                     while (!doneWithValues && valIter.hasNext()) {
                         Order val = valIter.next();
-                        // Decide if the trade ammount is (greater than or equal 
-                        // to) OR strictly less than the required fill
                         
-                        System.out.println("Eligible orders:");
-                        System.out.println(getMapDisplayString(orderType, filterKeys));
+//                        System.out.println("Eligible orders:");
+//                        System.out.println(getMapDisplayString(orderType, filterKeys));
                         
                         BigDecimal tradableAmount = val.getTradableAmount();
                         
@@ -116,7 +115,7 @@ public class OrderBook {
                         if (comparison > 0) {
                             // The existing order is larger than our incoming order.
                             // Can fill the order with left over value on the order in the collection
-                            System.out.println(tradableAmount + " can fill the remaining required fill " + fillDecrementer);
+//                            System.out.println(tradableAmount + " can fill the remaining required fill " + fillDecrementer);
                             
                             // profit value
                             BigDecimal multiply = tradePrice.multiply(fillDecrementer);
@@ -133,7 +132,7 @@ public class OrderBook {
                             // The existing order is equal to the incoming order
                             // We can finish the order and remove the existing
                             // order.
-                            System.out.println(tradableAmount + " can EXACTLY fill the remaining required fill " + fillDecrementer);
+//                            System.out.println(tradableAmount + " can EXACTLY fill the remaining required fill " + fillDecrementer);
                             
                             // profit value
                             BigDecimal multiply = tradePrice.multiply(fillDecrementer);
@@ -149,7 +148,7 @@ public class OrderBook {
                         } else {
                             // The existing order cannot fill our incoming order
                             // We will use it up and remove it from the order collection
-                            System.out.println(tradableAmount + " can PARTIALLY fill the remaining required fill " + fillDecrementer);
+//                            System.out.println(tradableAmount + " can PARTIALLY fill the remaining required fill " + fillDecrementer);
                             
                             // profit value
                             BigDecimal multiply = tradePrice.multiply(tradableAmount);
@@ -171,8 +170,8 @@ public class OrderBook {
                 }
             }
             
-            System.out.println("done processing transactions!!");
-            System.out.println("Unfilled order: " + fillDecrementer);
+//            System.out.println("done processing transactions!!");
+//            System.out.println("Unfilled order: " + fillDecrementer);
             
         } else {
             switch (orderType) {
