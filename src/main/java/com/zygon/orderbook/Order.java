@@ -25,6 +25,10 @@ public class Order {
                 this.mutableLimitOrder.getTimestamp(), this.mutableLimitOrder.getLimitPrice());
     }
     
+    public String getId() {
+        return this.mutableLimitOrder.getId();
+    }
+    
     public BigDecimal getLimitPrice() {
         return this.mutableLimitOrder.getLimitPrice();
     }

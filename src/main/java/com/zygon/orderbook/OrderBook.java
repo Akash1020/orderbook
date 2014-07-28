@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 /**
@@ -21,7 +22,6 @@ public class OrderBook {
     
     private final Multimap<BigDecimal, Order> asks = Multimaps.newListMultimap(
             new TreeMap<BigDecimal, Collection<Order>>(), 
-            
             new Supplier<List<Order>>() {
                 @Override
                 public List<Order> get() {
@@ -32,7 +32,6 @@ public class OrderBook {
     
     private final Multimap<BigDecimal, Order> bids = Multimaps.newListMultimap(
             new TreeMap<BigDecimal, Collection<Order>>(), 
-            
             new Supplier<List<Order>>() {
                 @Override
                 public List<Order> get() {
@@ -41,11 +40,9 @@ public class OrderBook {
             }
         );
     
+    private final Map<String, Order> ordersById = Maps.newHashMap();
+    
     public synchronized void addOrder(final Order order) {
-        
-        // TBD: determine if the order will cross over using locally cached 
-        // variables.  For now just create a filter and if nothing comes back
-        // then you know.
         
         final com.xeiam.xchange.dto.trade.LimitOrder.OrderType orderType = order.getType();
         Multimap<BigDecimal, Order> filterBook = null;
@@ -147,6 +144,7 @@ public class OrderBook {
                             fillDecrementer = BigDecimal.ZERO;
                             
                             valIter.remove();
+                            this.ordersById.remove(val.getId());
                             doneWithValues = true;
                         } else {
                             // The existing order cannot fill our incoming order
@@ -162,6 +160,7 @@ public class OrderBook {
                             fillDecrementer = fillDecrementer.subtract(tradableAmount);
                             
                             valIter.remove();
+                            this.ordersById.remove(val.getId());
                         }
                     }
                     
@@ -184,9 +183,34 @@ public class OrderBook {
                     this.bids.put(order.getLimitPrice(), order);
                     break;
             }
+            
+            this.ordersById.put(order.getId(), order);
         }
     }
 
+    public synchronized void cancelOrder (String orderId) {
+        Order removed = this.ordersById.remove(orderId);
+        
+        if (removed != null) {
+            Multimap<BigDecimal, Order> map = null;
+            
+            switch (removed.getType()) {
+                case ASK:
+                    map = this.asks;
+                    break;
+                case BID:
+                    map = this.bids;
+                    break;
+            }
+            
+            if (!map.remove(removed.getLimitPrice(), removed)) {
+                throw new IllegalStateException("Order should be in all collections");
+            }
+            
+            System.out.println("Order " + orderId + " has been removed.");
+        }
+    }
+    
     // order type for convenience - it could be discovered.
     private String getMapDisplayString(com.xeiam.xchange.dto.trade.LimitOrder.OrderType type, Multimap<BigDecimal, Order> map) {
         StringBuilder sb = new StringBuilder();

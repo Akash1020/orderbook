@@ -44,6 +44,14 @@ public class main {
         
         System.out.println(book);
         
+        for (int j = 0; j < ID; j++) {
+            if (new Random().nextInt(10) < 1) {
+                book.cancelOrder(String.valueOf(j));
+            }
+        }
+        
+        System.out.println(book);
+        
         // Cross the price barrier
         
         // allowing zero fill for testing
